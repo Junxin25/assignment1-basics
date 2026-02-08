@@ -164,3 +164,6 @@ cython_debug/
 
 # data files
 data/
+training_bpe_result/
+
+.vscode/

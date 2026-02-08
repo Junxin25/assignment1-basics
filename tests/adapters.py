@@ -29,7 +29,14 @@ def run_linear(
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
 
-    raise NotImplementedError
+    # raise NotImplementedError
+    # input_path = os.fspath(input_path)
+    from cs336_basics.linear import linear
+    layer = linear(d_in, d_out)
+    layer.W.data = weights.T
+    return layer.forward(in_features)
+
+    
 
 
 def run_embedding(
@@ -51,8 +58,11 @@ def run_embedding(
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
 
-    raise NotImplementedError
-
+    # raise NotImplementedError
+    from cs336_basics.embedding import embedding
+    layer = embedding(vocab_size, d_model)
+    layer.weight.data = weights
+    return layer.forward(token_ids)
 
 def run_swiglu(
     d_model: int,
@@ -83,7 +93,13 @@ def run_swiglu(
     # swiglu.w1.weight.data = w1_weight
     # swiglu.w2.weight.data = w2_weight
     # swiglu.w3.weight.data = w3_weight
-    raise NotImplementedError
+    from cs336_basics.positionwise_feedforward import PositionwiseFeedForward
+    layer = PositionwiseFeedForward(d_model, device=in_features.device, dtype=in_features.dtype)
+    layer.weight1.data = w1_weight.T
+    layer.weight2.data = w2_weight.T
+    layer.weight3.data = w3_weight.T
+    return layer.forward(in_features)
+    # raise NotImplementedError
 
 
 def run_scaled_dot_product_attention(
@@ -200,7 +216,10 @@ def run_rope(
     Returns:
         Float[Tensor, " ... sequence_length d_k"]: Tensor with RoPEd input.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    from cs336_basics.RoPE import RotaryPositionalEmbedding
+    rope = RotaryPositionalEmbedding(theta, d_k, max_seq_len, device=in_query_or_key.device).to(in_query_or_key.device)
+    return rope(in_query_or_key, token_positions)
 
 
 def run_transformer_block(
@@ -378,7 +397,11 @@ def run_rmsnorm(
         Float[Tensor,"... d_model"]: Tensor of with the same shape as `in_features` with the output of running
         RMSNorm of the `in_features`.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    from cs336_basics.rmsnorm import RMSNorm
+    layer = RMSNorm(d_model, eps)
+    layer.weight.data = weights
+    return layer.forward(in_features)
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
@@ -559,7 +582,9 @@ def get_tokenizer(
     Returns:
         A BPE tokenizer that uses the provided vocab, merges, and special tokens.
     """
-    raise NotImplementedError
+    # raise NotImplementedError
+    from cs336_basics.tokenizer import Tokenizer
+    return Tokenizer(vocab=vocab, merges=merges, special_tokens=special_tokens)
 
 
 def run_train_bpe(
@@ -589,5 +614,8 @@ def run_train_bpe(
                 representing that <token1> was merged with <token2>.
                 Merges are ordered by order of creation.
     """
-    
-    raise NotImplementedError
+    input_path = os.fspath(input_path)
+    from cs336_basics.bpe_train import train_bpe
+    return train_bpe(input_path, vocab_size, special_tokens)
+
+    #raise NotImplementedError
